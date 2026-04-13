@@ -1,0 +1,65 @@
+{
+  "name": "xq-doc-viewer",
+  "version": "0.1.0",
+  "description": "A framework-agnostic document viewer SDK supporting PDF, DOCX, PPTX, Excel, CSV, OFD, images, video, audio, text, and markdown.",
+  "type": "module",
+  "main": "./dist/xq-doc-viewer.cjs",
+  "module": "./dist/xq-doc-viewer.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/xq-doc-viewer.js",
+      "require": "./dist/xq-doc-viewer.cjs"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite serve dev",
+    "build": "vite build",
+    "build:iife": "vite build --config vite.config.iife.ts",
+    "build:all": "pnpm build && pnpm build:iife",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src/",
+    "format": "prettier --write src/"
+  },
+  "keywords": [
+    "document-viewer",
+    "pdf",
+    "docx",
+    "pptx",
+    "excel",
+    "csv",
+    "ofd",
+    "image",
+    "video",
+    "audio",
+    "markdown",
+    "watermark",
+    "preview"
+  ],
+  "license": "MIT",
+  "author": "youngqj",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/youngqj/xq-doc-viewer.git"
+  },
+  "homepage": "https://github.com/youngqj/xq-doc-viewer",
+  "bugs": {
+    "url": "https://github.com/youngqj/xq-doc-viewer/issues"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/papaparse": "^5.5.2",
+    "eslint": "^10.2.0",
+    "prettier": "^3.8.2",
+    "typescript": "~5.7.3",
+    "vite": "~6.0.15",
+    "vite-plugin-dts": "^4.5.4",
+    "vitest": "~3.0.9"
+  }
+}

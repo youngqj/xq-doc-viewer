@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>xq-doc-viewer Dev</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f5;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    h1 { font-size: 20px; margin-bottom: 16px; color: #1a1a1a; }
+    .controls {
+      display: flex; gap: 12px; margin-bottom: 16px; align-items: center; flex-wrap: wrap;
+    }
+    .controls label { font-size: 14px; color: #666; }
+    .controls select, .controls input[type="file"], .controls input[type="text"], .controls input[type="number"] {
+      padding: 6px 10px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 14px;
+    }
+    .controls input[type="text"] { width: 120px; }
+    .controls input[type="number"] { width: 60px; }
+    .controls button {
+      padding: 6px 14px; border: 1px solid #d9d9d9; border-radius: 4px;
+      font-size: 14px; cursor: pointer; background: white;
+    }
+    .controls button:hover { background: #f5f5f5; }
+    .controls button.active { background: #1890ff; color: white; border-color: #1890ff; }
+    #viewer-container {
+      width: 100%;
+      height: calc(100vh - 140px);
+      border-radius: 8px;
+      overflow: hidden;
+      background: white;
+    }
+    .drop-zone {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      border: 2px dashed #d9d9d9;
+      border-radius: 8px;
+      color: #999;
+      font-size: 16px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .drop-zone.dragover {
+      border-color: #1890ff;
+      background: #e6f7ff;
+      color: #1890ff;
+    }
+  </style>
+</head>
+<body>
+  <h1>xq-doc-viewer Dev Playground</h1>
+  <div class="controls">
+    <label>
+      Theme:
+      <select id="theme-select">
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+      </select>
+    </label>
+    <label>
+      Locale:
+      <select id="locale-select">
+        <option value="zh-CN">中文</option>
+        <option value="en">English</option>
+      </select>
+    </label>
+    <input type="file" id="file-input" />
+    <span style="color:#ccc">|</span>
+    <label>
+      水印:
+      <input type="text" id="watermark-text" placeholder="水印文字" />
+    </label>
+    <label>
+      颜色:
+      <input type="text" id="watermark-color" value="rgba(0,0,0,0.1)" style="width:140px" />
+    </label>
+    <label>
+      角度:
+      <input type="number" id="watermark-rotate" value="-30" />
+    </label>
+    <button id="watermark-apply">应用水印</button>
+    <button id="watermark-remove">清除水印</button>
+  </div>
+  <div id="viewer-container">
+    <div class="drop-zone" id="drop-zone">
+      拖拽文件到此处 或 点击上方选择文件
+    </div>
+  </div>
+
+  <script type="module">
+    import { createViewer } from '../src/index.ts'
+
+    let viewer = null
+
+    async function openFile(file) {
+      // Remove drop zone
+      const dz = document.getElementById('drop-zone')
+      if (dz) dz.remove()
+
+      if (viewer) {
+        viewer.destroy()
+      }
+
+      viewer = createViewer({
+        target: '#viewer-container',
+        file,
+        theme: document.getElementById('theme-select').value,
+        locale: document.getElementById('locale-select').value,
+        onReady: () => console.log('[dev] Ready'),
+        onError: (err) => console.error('[dev] Error:', err),
+      })
+      await viewer.mount()
+    }
+
+    // File input
+    document.getElementById('file-input').addEventListener('change', (e) => {
+      const file = e.target.files?.[0]
+      if (file) openFile(file)
+    })
+
+    // Drag & drop
+    const dropZone = document.getElementById('drop-zone')
+    const container = document.getElementById('viewer-container')
+
+    container.addEventListener('dragover', (e) => {
+      e.preventDefault()
+      dropZone?.classList.add('dragover')
+    })
+    container.addEventListener('dragleave', () => {
+      dropZone?.classList.remove('dragover')
+    })
+    container.addEventListener('drop', (e) => {
+      e.preventDefault()
+      dropZone?.classList.remove('dragover')
+      const file = e.dataTransfer?.files?.[0]
+      if (file) openFile(file)
+    })
+
+    // Theme switch
+    document.getElementById('theme-select').addEventListener('change', (e) => {
+      if (viewer) viewer.setTheme(e.target.value)
+    })
+
+    // Locale switch
+    document.getElementById('locale-select').addEventListener('change', (e) => {
+      if (viewer) viewer.setLocale(e.target.value)
+    })
+
+    // Watermark controls
+    document.getElementById('watermark-apply').addEventListener('click', () => {
+      if (!viewer) return
+      const text = document.getElementById('watermark-text').value
+      if (!text) return
+      viewer.setWatermark({
+        text,
+        color: document.getElementById('watermark-color').value || undefined,
+        rotate: Number(document.getElementById('watermark-rotate').value) || -30,
+      })
+    })
+
+    document.getElementById('watermark-remove').addEventListener('click', () => {
+      if (viewer) viewer.removeWatermark()
+    })
+  </script>
+</body>
+</html>

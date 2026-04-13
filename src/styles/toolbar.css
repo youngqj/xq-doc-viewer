@@ -1,0 +1,52 @@
+.xq-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background: var(--xq-toolbar-bg);
+  border-bottom: 1px solid var(--xq-border);
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.xq-toolbar__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--xq-toolbar-text);
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.15s;
+}
+
+.xq-toolbar__btn:hover {
+  background: var(--xq-border);
+}
+
+.xq-toolbar__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.xq-toolbar__separator {
+  width: 1px;
+  height: 20px;
+  background: var(--xq-border);
+  margin: 0 4px;
+}
+
+.xq-toolbar__page-info {
+  font-size: 13px;
+  color: var(--xq-text-secondary);
+  min-width: 80px;
+  text-align: center;
+}
+
+.xq-toolbar__spacer {
+  flex: 1;
+}

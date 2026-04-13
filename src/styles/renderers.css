@@ -1,0 +1,190 @@
+/* ─── PDF ─── */
+.xq-renderer-pdf canvas {
+  display: block;
+  margin: 0 auto 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* ─── Image ─── */
+.xq-renderer-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.xq-renderer-image img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transition: transform 0.2s;
+}
+
+/* ─── Text ─── */
+.xq-renderer-text {
+  width: 100%;
+}
+
+.xq-renderer-text pre {
+  margin: 0;
+  padding: 16px;
+  font-family: 'SF Mono', SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--xq-text-primary);
+  background: var(--xq-bg-secondary);
+  border-radius: 4px;
+  overflow: auto;
+}
+
+/* ─── Markdown ─── */
+.xq-renderer-markdown {
+  width: 100%;
+  max-width: 800px;
+  line-height: 1.7;
+  color: var(--xq-text-primary);
+}
+
+.xq-renderer-markdown h1,
+.xq-renderer-markdown h2,
+.xq-renderer-markdown h3 {
+  margin-top: 1.2em;
+  margin-bottom: 0.6em;
+}
+
+.xq-renderer-markdown code {
+  background: var(--xq-bg-secondary);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+.xq-renderer-markdown pre code {
+  display: block;
+  padding: 12px;
+  overflow-x: auto;
+}
+
+/* ─── Video / Audio ─── */
+.xq-renderer-video,
+.xq-renderer-audio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.xq-renderer-video video {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 4px;
+}
+
+.xq-audio-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+  max-width: 500px;
+  width: 100%;
+}
+
+.xq-audio-canvas {
+  width: 100%;
+  max-width: 400px;
+  height: 120px;
+  border-radius: 8px;
+  background: var(--xq-bg, #fafafa);
+}
+
+.xq-audio-wrapper audio {
+  width: 100%;
+}
+
+/* ─── Table (Excel / CSV) ─── */
+.xq-renderer-table {
+  width: 100%;
+  overflow: auto;
+}
+
+.xq-renderer-table table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 13px;
+}
+
+.xq-renderer-table th,
+.xq-renderer-table td {
+  border: 1px solid var(--xq-border);
+  padding: 6px 10px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.xq-renderer-table th {
+  background: var(--xq-bg-secondary);
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+}
+
+.xq-renderer-table tr:hover td {
+  background: var(--xq-bg-secondary);
+}
+
+/* ─── DOCX ─── */
+.xq-renderer-docx {
+  width: 100%;
+  background: white;
+  padding: 20px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+/* ─── PPTX ─── */
+.xq-renderer-pptx {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: #e8e8e8;
+}
+
+.xq-renderer-pptx canvas {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* ─── OFD ─── */
+.xq-renderer-ofd {
+  width: 100%;
+  overflow: auto;
+}
+
+.xq-renderer-ofd__page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px;
+}
+
+.xq-renderer-ofd__page > div {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 12px;
+}
+
+/* ─── Watermark Overlay ─── */
+.xq-watermark-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 999;
+  overflow: hidden;
+}
