@@ -82,6 +82,13 @@ export interface WatermarkConfig {
   gap?: [number, number]
 }
 
+// ─── Branding ───
+export interface BrandingConfig {
+  show?: boolean
+  text?: string
+  url?: string
+}
+
 // ─── Viewer Options ───
 export interface ViewerOptions {
   target: HTMLElement | string
@@ -91,6 +98,7 @@ export interface ViewerOptions {
   theme?: ThemeMode | ThemeConfig
   locale?: LocaleKey | LocaleConfig
   watermark?: WatermarkConfig
+  branding?: boolean | BrandingConfig
   width?: string | number
   height?: string | number
   onReady?: () => void

@@ -17,6 +17,7 @@ export type {
   LocaleMessages,
   ToolbarConfig,
   WatermarkConfig,
+  BrandingConfig,
   Renderer,
   RendererFactory,
 } from './core/types'

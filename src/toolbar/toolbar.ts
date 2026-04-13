@@ -39,7 +39,7 @@ export class Toolbar {
       rotate: true,
       pagination: true,
       fullscreen: true,
-      print: true,
+      print: false,
       download: true,
       ...config,
     }

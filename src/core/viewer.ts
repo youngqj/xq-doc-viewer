@@ -1,4 +1,5 @@
 import type {
+  BrandingConfig,
   FileSource,
   FileType,
   LocaleConfig,
@@ -263,6 +264,20 @@ export class Viewer {
     this.contentEl.className = 'xq-doc-viewer__content'
     this.container.appendChild(this.contentEl)
 
+    // 品牌版权栏 - 默认显示
+    if (this.options.branding !== false) {
+      const cfg = this.resolveBranding()
+      const bar = document.createElement('div')
+      bar.className = 'xq-doc-viewer__branding'
+      const link = document.createElement('a')
+      link.href = cfg.url
+      link.target = '_blank'
+      link.rel = 'noopener noreferrer'
+      link.textContent = cfg.text
+      bar.appendChild(link)
+      this.container.appendChild(bar)
+    }
+
     this.root.appendChild(this.container)
   }
 
@@ -279,6 +294,24 @@ export class Viewer {
     }
     if (src instanceof File) return src.name
     return 'download'
+  }
+
+  /**
+   * 解析品牌配置，合并默认值
+   * 作者: yangqijun 2026-04-14
+   */
+  private resolveBranding(): Required<Omit<BrandingConfig, 'show'>> {
+    const defaults = {
+      text: 'xq-doc-viewer 提供文档预览支持',
+      url: 'https://www.xiaoquio.com',
+    }
+    if (typeof this.options.branding === 'object') {
+      return {
+        text: this.options.branding.text ?? defaults.text,
+        url: this.options.branding.url ?? defaults.url,
+      }
+    }
+    return defaults
   }
 }
 
