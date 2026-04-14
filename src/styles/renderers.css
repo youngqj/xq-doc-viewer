@@ -1,8 +1,36 @@
 /* ─── PDF ─── */
+.xq-renderer-pdf {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
 .xq-renderer-pdf canvas {
   display: block;
-  margin: 0 auto 12px;
+  margin: 0 auto;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.xq-pdf-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.xq-pdf-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--xq-border, #e0e0e0);
+  border-top-color: var(--xq-accent, #1890ff);
+  border-radius: 50%;
+  animation: xq-spin 0.8s linear infinite;
+}
+
+@keyframes xq-spin {
+  to { transform: rotate(360deg); }
 }
 
 /* ─── Image ─── */
@@ -117,22 +145,72 @@
   font-size: 13px;
 }
 
-.xq-renderer-table th,
-.xq-renderer-table td {
+.xq-renderer-table td,
+.xq-renderer-table th {
   border: 1px solid var(--xq-border);
   padding: 6px 10px;
   text-align: left;
   white-space: nowrap;
+  vertical-align: middle;
 }
 
-.xq-renderer-table th {
+/* ─── Excel-specific ─── */
+.xq-excel-table {
+  table-layout: fixed;
+}
+
+.xq-excel-table td {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ─── Sheet Tabs ─── */
+.xq-sheet-tabs {
+  display: flex;
+  gap: 0;
+  padding: 0 8px;
+  background: var(--xq-bg-secondary, #f5f5f5);
+  border-top: 1px solid var(--xq-border);
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+
+.xq-sheet-tab {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 16px;
+  border: none;
+  border-top: 2px solid transparent;
+  background: transparent;
+  color: var(--xq-text-secondary, #999);
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.xq-sheet-tab:hover {
+  color: var(--xq-text-primary);
+  background: var(--xq-bg-primary, #fff);
+}
+
+.xq-sheet-tab--active {
+  color: var(--xq-accent, #1890ff);
+  border-top-color: var(--xq-accent, #1890ff);
+  background: var(--xq-bg-primary, #fff);
+  font-weight: 500;
+}
+
+/* CSV header row styling */
+.xq-renderer-table .xq-csv-table th {
   background: var(--xq-bg-secondary);
   font-weight: 600;
   position: sticky;
   top: 0;
 }
 
-.xq-renderer-table tr:hover td {
+.xq-renderer-table .xq-csv-table tr:hover td {
   background: var(--xq-bg-secondary);
 }
 

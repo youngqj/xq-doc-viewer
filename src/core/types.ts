@@ -119,6 +119,9 @@ export interface Renderer {
   gotoPage?(page: number): void
   getCurrentPage?(): number
   print?(): void
+
+  // Scroll-driven page change callback (set by Viewer)
+  onPageChange?: (page: number) => void
 }
 
 export type RendererFactory = () => Promise<Renderer>

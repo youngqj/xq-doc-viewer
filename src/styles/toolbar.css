@@ -47,6 +47,13 @@
   text-align: center;
 }
 
+.xq-toolbar__zoom-info {
+  font-size: 13px;
+  color: var(--xq-text-secondary);
+  min-width: 44px;
+  text-align: center;
+}
+
 .xq-toolbar__spacer {
   flex: 1;
 }

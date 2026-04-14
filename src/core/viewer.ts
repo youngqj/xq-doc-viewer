@@ -109,14 +109,25 @@ export class Viewer {
       this.contentEl.innerHTML = ''
     }
 
+    // Show loading overlay
+    const loadingEl = this.showLoading()
+
     try {
       this.renderer = await createRenderer(resolvedType)
       this.renderer.mount(this.contentEl)
+
+      // Sync scroll-driven page changes from renderer to viewer
+      this.renderer.onPageChange = (page: number) => {
+        this.currentPage = page
+        this.bus.emit('page-change', { page, total: this.totalPages })
+        this.toolbar?.update()
+      }
+
       await this.renderer.load(source)
 
       this.totalPages = this.renderer.getPageCount?.() ?? 1
-      this.currentPage = 1
-      this.currentScale = 1
+      this.currentPage = this.renderer.getCurrentPage?.() ?? 1
+      this.currentScale = resolvedType === 'pdf' ? 0.5 : 1
       this.currentRotation = 0
 
       this.bus.emit('load', { type: resolvedType })
@@ -127,6 +138,8 @@ export class Viewer {
       this.bus.emit('error', { error })
       this.options.onError?.(error)
       throw error
+    } finally {
+      loadingEl.remove()
     }
   }
 
@@ -168,11 +181,13 @@ export class Viewer {
   }
 
   prevPage(): void {
-    this.gotoPage(this.currentPage - 1)
+    const current = this.renderer?.getCurrentPage?.() ?? this.currentPage
+    this.gotoPage(current - 1)
   }
 
   nextPage(): void {
-    this.gotoPage(this.currentPage + 1)
+    const current = this.renderer?.getCurrentPage?.() ?? this.currentPage
+    this.gotoPage(current + 1)
   }
 
   fullscreen(enable: boolean): void {
@@ -273,8 +288,10 @@ export class Viewer {
       link.href = cfg.url
       link.target = '_blank'
       link.rel = 'noopener noreferrer'
-      link.textContent = cfg.text
+      link.textContent = 'XQDocViewer'
+      const text = document.createTextNode(' 提供文档预览支持')
       bar.appendChild(link)
+      bar.appendChild(text)
       this.container.appendChild(bar)
     }
 
@@ -284,6 +301,19 @@ export class Viewer {
   private detectType(source: FileSource): FileType | undefined {
     if (source instanceof ArrayBuffer) return undefined
     return detectFileType(source as string | File | Blob)
+  }
+
+  private showLoading(): HTMLElement {
+    const overlay = document.createElement('div')
+    overlay.className = 'xq-loading-overlay'
+    overlay.innerHTML = `
+      <div class="xq-loading-content">
+        <div class="xq-loading-spinner"></div>
+        <span>${this.i18n.t('loading')}</span>
+      </div>
+    `
+    this.contentEl.appendChild(overlay)
+    return overlay
   }
 
   private guessFilename(): string {

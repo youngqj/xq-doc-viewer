@@ -24,11 +24,18 @@ const ICONS = {
     '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
 }
 
+const ZOOM_STEPS = [0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4, 5]
+const ZOOM_MIN = ZOOM_STEPS[0]
+const ZOOM_MAX = ZOOM_STEPS[ZOOM_STEPS.length - 1]
+
 export class Toolbar {
   private readonly viewer: Viewer
   private readonly config: ToolbarConfig
   private el: HTMLElement | null = null
   private pageInfo: HTMLElement | null = null
+  private zoomInfo: HTMLElement | null = null
+  private zoomInBtn: HTMLButtonElement | null = null
+  private zoomOutBtn: HTMLButtonElement | null = null
   private prevBtn: HTMLButtonElement | null = null
   private nextBtn: HTMLButtonElement | null = null
 
@@ -49,8 +56,15 @@ export class Toolbar {
     this.el = createElement('div', 'xq-toolbar')
 
     if (this.config.zoom) {
-      this.el.appendChild(this.btn('zoomOut', ICONS.zoomOut, () => this.viewer.zoom(this.viewer.getScale() - 0.25)))
-      this.el.appendChild(this.btn('zoomIn', ICONS.zoomIn, () => this.viewer.zoom(this.viewer.getScale() + 0.25)))
+      this.zoomOutBtn = this.btn('zoomOut', ICONS.zoomOut, () => this.stepZoom(-1))
+      this.el.appendChild(this.zoomOutBtn)
+
+      this.zoomInfo = createElement('span', 'xq-toolbar__zoom-info')
+      this.zoomInfo.textContent = '100%'
+      this.el.appendChild(this.zoomInfo)
+
+      this.zoomInBtn = this.btn('zoomIn', ICONS.zoomIn, () => this.stepZoom(1))
+      this.el.appendChild(this.zoomInBtn)
       this.el.appendChild(this.separator())
     }
 
@@ -107,6 +121,12 @@ export class Toolbar {
     }
     if (this.prevBtn) this.prevBtn.disabled = this.viewer.getPage() <= 1
     if (this.nextBtn) this.nextBtn.disabled = this.viewer.getPage() >= this.viewer.getTotalPages()
+
+    // Zoom state
+    const scale = this.viewer.getScale()
+    if (this.zoomInfo) this.zoomInfo.textContent = `${Math.round(scale * 100)}%`
+    if (this.zoomOutBtn) this.zoomOutBtn.disabled = scale <= ZOOM_MIN
+    if (this.zoomInBtn) this.zoomInBtn.disabled = scale >= ZOOM_MAX
   }
 
   updateLabels(): void {
@@ -123,8 +143,33 @@ export class Toolbar {
     this.el?.remove()
     this.el = null
     this.pageInfo = null
+    this.zoomInfo = null
+    this.zoomInBtn = null
+    this.zoomOutBtn = null
     this.prevBtn = null
     this.nextBtn = null
+  }
+
+  /** Step to the next/prev preset zoom level */
+  private stepZoom(direction: 1 | -1): void {
+    const current = this.viewer.getScale()
+    let target = current
+
+    if (direction > 0) {
+      // Find the next step larger than current
+      for (const s of ZOOM_STEPS) {
+        if (s > current + 0.01) { target = s; break }
+      }
+    } else {
+      // Find the next step smaller than current
+      for (let i = ZOOM_STEPS.length - 1; i >= 0; i--) {
+        if (ZOOM_STEPS[i] < current - 0.01) { target = ZOOM_STEPS[i]; break }
+      }
+    }
+
+    if (target !== current) {
+      this.viewer.zoom(target)
+    }
   }
 
   private btn(action: string, icon: string, onClick: () => void): HTMLButtonElement {

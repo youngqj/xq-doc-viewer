@@ -66,7 +66,7 @@ class CsvRenderer implements Renderer {
 
   private renderFull(): void {
     if (!this.wrapper) return
-    let html = '<table>'
+    let html = '<table class="xq-csv-table">'
     this.rows.forEach((row, ri) => {
       const tag = ri === 0 ? 'th' : 'td'
       html += '<tr>'
@@ -88,8 +88,7 @@ class CsvRenderer implements Renderer {
     this.scrollContainer.style.cssText = 'overflow-y:auto;height:100%;position:relative;'
 
     const table = document.createElement('table')
-
-    // Header
+    table.className = 'xq-csv-table'
     const thead = document.createElement('thead')
     const headerTr = document.createElement('tr')
     this.rows[0].forEach((cell) => {

@@ -3,9 +3,11 @@ import type { FileSource, FileType, Renderer } from '../core/types'
 class OfdRenderer implements Renderer {
   readonly type: FileType = 'ofd'
   private container: HTMLElement | null = null
-  private ofdViewer: EasyOFDInstance | null = null
-  private totalPages = 0
+  private ofdData: unknown = null
+  private pageDivs: HTMLDivElement[] = []
+  private totalPageCount = 0
   private currentPageNum = 1
+  private currentScale = 1
 
   mount(container: HTMLElement): void {
     this.container = container
@@ -15,46 +17,37 @@ class OfdRenderer implements Renderer {
   async load(source: FileSource): Promise<void> {
     if (!this.container) return
 
-    const EasyOFD = (await import('easyofd')).default
+    // Dynamic import from local source (lazy-loaded)
+    const { parseOfdDocument, renderOfd, setPageScale } = await import('../lib/ofd/ofd.js')
 
-    const id = 'xq-ofd-' + Date.now()
-    const viewer = new EasyOFD(id, this.container) as unknown as EasyOFDInstance
-    this.ofdViewer = viewer
+    const data = await toArrayBuffer(source)
 
-    const blob = await toBlob(source)
-
-    await new Promise<void>((resolve) => {
-      let resolved = false
-
-      // Listen on the doc's event bus — does NOT override the original handler
-      viewer.doc.$on('DocumentChange', () => {
-        if (!resolved) {
-          resolved = true
-          this.totalPages = viewer.view?.AllPageNo ?? 1
-          this.currentPageNum = viewer.view?.pageNow ?? 1
-          resolve()
-        }
-        this.currentPageNum = viewer.view?.pageNow ?? 1
+    // Parse OFD document
+    const ofdData = await new Promise<unknown>((resolve, reject) => {
+      parseOfdDocument({
+        ofd: data,
+        success(res: unknown) {
+          resolve(res)
+        },
+        fail(err: unknown) {
+          reject(new Error(String(err)))
+        },
       })
-
-      viewer.loadFromBlob(blob)
-
-      // Fallback timeout
-      setTimeout(() => {
-        if (!resolved) {
-          resolved = true
-          this.totalPages = viewer.view?.AllPageNo ?? 1
-          resolve()
-        }
-      }, 8000)
     })
 
-    // Hide EasyOFD's built-in toolbar — we use our own
-    this.hideBuiltinToolbar()
+    // ofd.js returns an array of docs, take the first one
+    this.ofdData = Array.isArray(ofdData) ? ofdData[0] : ofdData
+    this.totalPageCount = (this.ofdData as Record<string, unknown>)?.pages
+      ? ((this.ofdData as Record<string, unknown>).pages as unknown[]).length
+      : 1
+
+    // Render all pages
+    this.renderPages(renderOfd, setPageScale)
   }
 
   destroy(): void {
-    this.ofdViewer = null
+    this.ofdData = null
+    this.pageDivs = []
     if (this.container) {
       this.container.innerHTML = ''
       this.container.classList.remove('xq-renderer-ofd')
@@ -63,19 +56,22 @@ class OfdRenderer implements Renderer {
   }
 
   zoom(scale: number): void {
-    if (!this.ofdViewer) return
-    this.ofdViewer.zoomSize = scale
-    this.ofdViewer.DocumentChange()
+    this.currentScale = scale
+    if (this.ofdData && this.container) {
+      import('../lib/ofd/ofd.js').then(({ renderOfd, setPageScale }) => {
+        this.renderPages(renderOfd, setPageScale)
+      })
+    }
   }
 
   getPageCount(): number {
-    return this.totalPages
+    return this.totalPageCount
   }
 
   gotoPage(page: number): void {
-    if (!this.ofdViewer?.view || page < 1 || page > this.totalPages) return
-    this.ofdViewer.view.pageNow = page
-    this.ofdViewer.DocumentChange()
+    if (page < 1 || page > this.totalPageCount) return
+    const target = this.pageDivs[page - 1]
+    target?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     this.currentPageNum = page
   }
 
@@ -83,40 +79,43 @@ class OfdRenderer implements Renderer {
     return this.currentPageNum
   }
 
-  private hideBuiltinToolbar(): void {
-    if (!this.container) return
-    const rootDiv = this.container.querySelector(`[id^="xq-ofd-"]`)
-    if (rootDiv) {
-      const toolbar = rootDiv.querySelector('div:first-child')
-      if (toolbar && toolbar.querySelector('.OfdButton')) {
-        ;(toolbar as HTMLElement).style.display = 'none'
+  private renderPages(
+    renderOfd: (screenWidth: number, ofd: unknown) => HTMLDivElement[],
+    setPageScale: (scale: number) => void,
+  ): void {
+    if (!this.container || !this.ofdData) return
+
+    const containerWidth = this.container.parentElement?.clientWidth ?? 800
+    const screenWidth = Math.floor(containerWidth * this.currentScale)
+
+    this.container.innerHTML = ''
+    this.pageDivs = []
+
+    setPageScale(this.currentScale)
+
+    const pageWrapper = document.createElement('div')
+    pageWrapper.className = 'xq-renderer-ofd__page'
+
+    const pages = renderOfd(screenWidth, this.ofdData)
+    if (Array.isArray(pages)) {
+      for (const pageDiv of pages) {
+        pageWrapper.appendChild(pageDiv)
+        this.pageDivs.push(pageDiv as HTMLDivElement)
       }
     }
+
+    this.container.appendChild(pageWrapper)
   }
 }
 
-interface EasyOFDDoc {
-  $on(event: string, handler: (...args: unknown[]) => void): void
-}
-
-interface EasyOFDView {
-  pageNow: number
-  AllPageNo: number
-}
-
-interface EasyOFDInstance {
-  loadFromBlob(blob: Blob): void
-  DocumentChange(): void
-  doc: EasyOFDDoc
-  view: EasyOFDView
-  zoomSize: number
-}
-
-async function toBlob(source: FileSource): Promise<Blob> {
-  if (source instanceof Blob) return source
-  if (source instanceof ArrayBuffer) return new Blob([source])
+async function toArrayBuffer(source: FileSource): Promise<ArrayBuffer> {
+  if (source instanceof ArrayBuffer) return source
+  if (source instanceof File || source instanceof Blob) {
+    return source.arrayBuffer()
+  }
+  // URL string — fetch as ArrayBuffer
   const resp = await fetch(source as string)
-  return resp.blob()
+  return resp.arrayBuffer()
 }
 
 export function create(): Renderer {
