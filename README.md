@@ -16,19 +16,19 @@
 
 ## 支持格式
 
-| 格式 | 扩展名 | 引擎 |
-|------|--------|------|
-| PDF | .pdf | pdfjs-dist |
-| Word | .docx | docx-preview |
-| PowerPoint | .pptx, .ppt | pptxtojson |
-| Excel | .xlsx, .xls | exceljs |
-| CSV | .csv | papaparse |
-| OFD | .ofd | easyofd |
-| 图片 | .jpg, .png, .gif, .svg, .webp, .bmp | 原生 |
-| 视频 | .mp4, .webm, .ogg | 原生 |
-| 音频 | .mp3, .wav, .ogg, .aac, .flac | Web Audio API |
-| 纯文本 | .txt, .log, .json, .xml, .yaml 等 | 原生 |
-| Markdown | .md | marked + highlight.js |
+| 格式 | 扩展名 |
+|------|--------|
+| PDF | .pdf |
+| Word | .docx |
+| PowerPoint | .pptx, .ppt |
+| Excel | .xlsx, .xls |
+| CSV | .csv |
+| OFD | .ofd |
+| 图片 | .jpg, .png, .gif, .svg, .webp, .bmp |
+| 视频 | .mp4, .webm, .ogg |
+| 音频 | .mp3, .wav, .ogg, .aac, .flac |
+| 纯文本 | .txt, .log, .json, .xml, .yaml 等 |
+| Markdown | .md |
 
 ## 安装
 
