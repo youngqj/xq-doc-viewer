@@ -161,15 +161,30 @@ export class Viewer {
 
   zoom(scale: number): void {
     this.currentScale = scale
-    this.renderer?.zoom?.(scale)
+    if (this.renderer?.zoom) {
+      this.renderer.zoom(scale)
+    } else {
+      this.applyFallbackTransform()
+    }
     this.bus.emit('zoom-change', { scale })
     this.toolbar?.update()
   }
 
   rotate(degrees: number): void {
     this.currentRotation = (this.currentRotation + degrees) % 360
-    this.renderer?.rotate?.(this.currentRotation)
+    if (this.renderer?.rotate) {
+      this.renderer.rotate(this.currentRotation)
+    } else {
+      this.applyFallbackTransform()
+    }
     this.toolbar?.update()
+  }
+
+  private applyFallbackTransform(): void {
+    const child = this.contentEl?.firstElementChild as HTMLElement | null
+    if (!child) return
+    child.style.transformOrigin = 'top left'
+    child.style.transform = `scale(${this.currentScale}) rotate(${this.currentRotation}deg)`
   }
 
   gotoPage(page: number): void {

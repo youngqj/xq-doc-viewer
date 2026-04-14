@@ -57,10 +57,18 @@ class OfdRenderer implements Renderer {
 
   zoom(scale: number): void {
     this.currentScale = scale
-    if (this.ofdData && this.container) {
-      import('../lib/ofd/ofd.js').then(({ renderOfd, setPageScale }) => {
-        this.renderPages(renderOfd, setPageScale)
-      })
+    const wrapper = this.container?.querySelector('.xq-renderer-ofd__page') as HTMLElement | null
+    if (wrapper) {
+      wrapper.style.transformOrigin = 'top left'
+      wrapper.style.transform = `scale(${scale})`
+    }
+  }
+
+  rotate(degrees: number): void {
+    const wrapper = this.container?.querySelector('.xq-renderer-ofd__page') as HTMLElement | null
+    if (wrapper) {
+      wrapper.style.transformOrigin = 'center top'
+      wrapper.style.transform = `scale(${this.currentScale}) rotate(${degrees}deg)`
     }
   }
 

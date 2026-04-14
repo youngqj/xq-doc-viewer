@@ -1,6 +1,6 @@
 {
   "name": "xq-doc-viewer",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "A framework-agnostic document viewer SDK supporting PDF, DOCX, PPTX, Excel, CSV, OFD, images, video, audio, text, and markdown.",
   "type": "module",
   "main": "./dist/xq-doc-viewer.cjs",

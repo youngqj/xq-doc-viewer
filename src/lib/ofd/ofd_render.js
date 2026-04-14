@@ -173,6 +173,10 @@ export const renderPage = function (pageDiv, page, tpls, fontResObj, drawParamRe
     }
     if (page[pageId].annotation) {
         for (const annotation of page[pageId].annotation) {
+            // Skip stamp/watermark annotations — stamps are rendered via stamp pipeline,
+            // watermarks are decorative overlays that should not duplicate page content
+            if (annotation.type === 'Stamp' || annotation.type === 'Watermark') continue;
+            if (annotation.visible === false || annotation.visible === 'false') continue;
             renderAnnotation(pageDiv, annotation, fontResObj, drawParamResObj, multiMediaResObj);
         }
     }
@@ -184,6 +188,8 @@ const renderAnnotation = function (pageDiv, annotation, fontResObj, drawParamRes
     let boundary = annotation['appearance']?.['@_Boundary'];
     if (boundary) {
         let divBoundary = converterBox(parseStBox(boundary));
+        const pageH = parseFloat(pageDiv.style.height);
+        if (pageH > 0 && divBoundary.y > pageH) return;
         div.setAttribute('style', `overflow: hidden;z-index:${annotation['pfIndex']};position:absolute; left: ${divBoundary.x}px; top: ${divBoundary.y}px; width: ${divBoundary.w}px; height: ${divBoundary.h}px`)
     }
     const contentLayer = annotation['appearance'];
