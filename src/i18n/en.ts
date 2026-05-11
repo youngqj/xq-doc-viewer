@@ -19,4 +19,10 @@ export const en: LocaleMessages = {
   pptxSlide: 'Slide',
   ofdPage: 'OFD Page',
   watermark: 'Watermark',
+  errorTitle: 'Cannot preview this file',
+  errorUnknownType: 'Cannot detect file type. Please pass `type` explicitly.',
+  errorUnsupportedType: 'Unsupported file type: {type}',
+  errorLoadFailed: 'Failed to load file',
+  errorNetwork: 'Cannot access the file. Please check the URL or network.',
+  errorRetry: 'Retry',
 }

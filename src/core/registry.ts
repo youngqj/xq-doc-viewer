@@ -37,6 +37,10 @@ export async function createRenderer(type: FileType): Promise<Renderer> {
   return mod.create()
 }
 
+export function isSupportedType(type: string): type is FileType {
+  return type in builtinRenderers || customFactories.has(type as FileType)
+}
+
 // ─── File type detection ───
 
 const EXTENSION_MAP: Record<string, FileType> = {
@@ -146,7 +150,10 @@ export function detectFileType(source: string | File | Blob): FileType | undefin
 
 function detectFromUrl(url: string): FileType | undefined {
   const cleaned = url.split('?')[0].split('#')[0]
-  const ext = cleaned.split('.').pop()?.toLowerCase()
+  const lastSegment = cleaned.substring(cleaned.lastIndexOf('/') + 1)
+  const dotIndex = lastSegment.lastIndexOf('.')
+  if (dotIndex < 0) return undefined
+  const ext = lastSegment.substring(dotIndex + 1).toLowerCase()
   return ext ? EXTENSION_MAP[ext] : undefined
 }
 

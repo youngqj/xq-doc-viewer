@@ -74,6 +74,12 @@
     <input type="file" id="file-input" />
     <span style="color:#ccc">|</span>
     <label>
+      URL:
+      <input type="text" id="url-input" placeholder="https://.../file.pdf" style="width:280px" />
+    </label>
+    <button id="url-load">加载 URL</button>
+    <span style="color:#ccc">|</span>
+    <label>
       水印:
       <input type="text" id="watermark-text" placeholder="水印文字" />
     </label>
@@ -116,13 +122,30 @@
         onReady: () => console.log('[dev] Ready'),
         onError: (err) => console.error('[dev] Error:', err),
       })
-      await viewer.mount()
+      try {
+        await viewer.mount()
+      } catch (err) {
+        // viewer already rendered an in-place error UI; swallow to avoid uncaught
+        console.warn('[dev] setFile rejected:', err?.message ?? err)
+      }
     }
 
     // File input
     document.getElementById('file-input').addEventListener('change', (e) => {
       const file = e.target.files?.[0]
       if (file) openFile(file)
+    })
+
+    // URL input
+    document.getElementById('url-load').addEventListener('click', () => {
+      const url = document.getElementById('url-input').value.trim()
+      if (url) openFile(url)
+    })
+    document.getElementById('url-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const url = e.target.value.trim()
+        if (url) openFile(url)
+      }
     })
 
     // Drag & drop

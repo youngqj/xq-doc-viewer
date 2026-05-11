@@ -19,4 +19,10 @@ export const zhCN: LocaleMessages = {
   pptxSlide: '幻灯片',
   ofdPage: 'OFD 页面',
   watermark: '水印',
+  errorTitle: '无法预览文件',
+  errorUnknownType: '无法识别文件类型，请通过 type 参数显式指定',
+  errorUnsupportedType: '暂不支持的文件类型：{type}',
+  errorLoadFailed: '文件加载失败',
+  errorNetwork: '无法访问文件，请检查 URL 或网络连接',
+  errorRetry: '重试',
 }

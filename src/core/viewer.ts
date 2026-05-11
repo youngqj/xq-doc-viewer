@@ -13,7 +13,7 @@ import type {
   WatermarkConfig,
 } from './types'
 import { EventBus } from './events'
-import { createRenderer, detectFileType } from './registry'
+import { createRenderer, detectFileType, isSupportedType } from './registry'
 import { getElement } from '../utils/dom'
 import { ThemeManager } from '../theme/theme'
 import { I18nManager } from '../i18n/i18n'
@@ -96,9 +96,27 @@ export class Viewer {
   async setFile(source: FileSource, type?: FileType): Promise<void> {
     const resolvedType = type ?? this.detectType(source)
     if (!resolvedType) {
-      const err = new Error(`[xq-doc-viewer] Cannot detect file type`)
+      const err = new Error(
+        `[xq-doc-viewer] Cannot detect file type from source. Pass \`type\` explicitly.`,
+      )
       this.bus.emit('error', { error: err })
       this.options.onError?.(err)
+      this.showError(this.i18n.t('errorUnknownType'), err.message, source, type)
+      throw err
+    }
+
+    if (!isSupportedType(resolvedType)) {
+      const err = new Error(
+        `[xq-doc-viewer] Unsupported file type: ${resolvedType}`,
+      )
+      this.bus.emit('error', { error: err })
+      this.options.onError?.(err)
+      this.showError(
+        this.i18n.t('errorUnsupportedType', { type: resolvedType }),
+        err.message,
+        source,
+        type,
+      )
       throw err
     }
 
@@ -108,6 +126,7 @@ export class Viewer {
       this.renderer = null
       this.contentEl.innerHTML = ''
     }
+    this.contentEl.querySelector('.xq-error-overlay')?.remove()
 
     // Show loading overlay
     const loadingEl = this.showLoading()
@@ -137,6 +156,12 @@ export class Viewer {
       const error = err instanceof Error ? err : new Error(String(err))
       this.bus.emit('error', { error })
       this.options.onError?.(error)
+      this.showError(
+        this.i18n.t('errorLoadFailed'),
+        this.describeLoadError(error, source),
+        source,
+        type,
+      )
       throw error
     } finally {
       loadingEl.remove()
@@ -329,6 +354,68 @@ export class Viewer {
     `
     this.contentEl.appendChild(overlay)
     return overlay
+  }
+
+  private showError(
+    title: string,
+    detail: string,
+    source: FileSource,
+    type: FileType | undefined,
+  ): void {
+    this.contentEl.querySelector('.xq-error-overlay')?.remove()
+
+    const overlay = document.createElement('div')
+    overlay.className = 'xq-error-overlay'
+
+    const card = document.createElement('div')
+    card.className = 'xq-error-card'
+
+    const icon = document.createElement('div')
+    icon.className = 'xq-error-icon'
+    icon.setAttribute('aria-hidden', 'true')
+    icon.innerHTML =
+      '<svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>'
+
+    const titleEl = document.createElement('div')
+    titleEl.className = 'xq-error-title'
+    titleEl.textContent = this.i18n.t('errorTitle')
+
+    const messageEl = document.createElement('div')
+    messageEl.className = 'xq-error-message'
+    messageEl.textContent = title
+
+    const detailEl = document.createElement('div')
+    detailEl.className = 'xq-error-detail'
+    detailEl.textContent = detail
+
+    card.append(icon, titleEl, messageEl, detailEl)
+
+    if (typeof source === 'string' || source instanceof File) {
+      const retryBtn = document.createElement('button')
+      retryBtn.type = 'button'
+      retryBtn.className = 'xq-error-retry'
+      retryBtn.textContent = this.i18n.t('errorRetry')
+      retryBtn.addEventListener('click', () => {
+        overlay.remove()
+        void this.setFile(source, type).catch(() => {})
+      })
+      card.appendChild(retryBtn)
+    }
+
+    overlay.appendChild(card)
+    this.contentEl.appendChild(overlay)
+  }
+
+  private describeLoadError(error: Error, source: FileSource): string {
+    const msg = error.message || String(error)
+    const looksLikeNetwork =
+      typeof source === 'string' &&
+      /^(https?:)?\/\//i.test(source) &&
+      /failed to fetch|networkerror|load failed|err_|cors|404|403|500|status/i.test(msg)
+    if (looksLikeNetwork) {
+      return `${this.i18n.t('errorNetwork')} (${msg})`
+    }
+    return msg
   }
 
   private guessFilename(): string {

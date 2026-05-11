@@ -66,6 +66,12 @@ export interface LocaleMessages {
   pptxSlide: string
   ofdPage: string
   watermark: string
+  errorTitle: string
+  errorUnknownType: string
+  errorUnsupportedType: string
+  errorLoadFailed: string
+  errorNetwork: string
+  errorRetry: string
 }
 
 export interface LocaleConfig {

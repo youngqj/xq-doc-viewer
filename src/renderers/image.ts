@@ -19,7 +19,8 @@ class ImageRenderer implements Renderer {
     this.img.src = url
     await new Promise<void>((resolve, reject) => {
       this.img!.onload = () => resolve()
-      this.img!.onerror = () => reject(new Error('Failed to load image'))
+      this.img!.onerror = () =>
+        reject(new Error(`Failed to load image from ${typeof source === 'string' ? source : 'source'}`))
     })
     this.container?.appendChild(this.img)
   }

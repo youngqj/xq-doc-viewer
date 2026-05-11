@@ -13,8 +13,12 @@ export class I18nManager {
     this.messages = customMessages ?? BUILTIN[locale] ?? zhCN
   }
 
-  t(key: keyof LocaleMessages): string {
-    return this.messages[key] ?? key
+  t(key: keyof LocaleMessages, params?: Record<string, string | number>): string {
+    const template = this.messages[key] ?? key
+    if (!params) return template
+    return template.replace(/\{(\w+)\}/g, (_, name) =>
+      params[name] != null ? String(params[name]) : `{${name}}`,
+    )
   }
 
   getLocale(): LocaleKey {
