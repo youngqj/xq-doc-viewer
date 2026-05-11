@@ -1,5 +1,7 @@
 # xq-doc-viewer
 
+**中文** | [English](./README.en.md)
+
 零依赖、框架无关的文档预览 SDK。支持 PDF、DOCX、PPTX、Excel、CSV、OFD、图片、视频、音频、纯文本、Markdown 共 11 种格式。
 
 ## 特性
@@ -301,10 +303,26 @@ createViewer({
       pptxSlide: '幻灯片',
       ofdPage: 'OFD 页面',
       watermark: '水印',
+      errorTitle: '无法预览文件',
+      errorUnknownType: '无法识别文件类型，请通过 type 参数显式指定',
+      errorUnsupportedType: '暂不支持的文件类型：{type}',
+      errorLoadFailed: '文件加载失败',
+      errorNetwork: '无法访问文件，请检查 URL 或网络连接',
+      errorRetry: '重试',
     },
   },
 })
 ```
+
+## 错误处理
+
+当文件无法预览时，Viewer 会在容器内渲染一个友好的错误提示卡片，而不是留下空白。覆盖三种失败场景：
+
+1. **未知类型** — 传了 `file` 但未传 `type`，且无法从扩展名推断。
+2. **不支持的类型** — 传入的 `type`（或推断出的类型）未注册。
+3. **加载/网络失败** — 请求失败、CORS 拦截、404，或底层渲染器抛错。
+
+URL 或 `File` 来源会附带「重试」按钮。`error` 事件和 `onError` 回调依然会触发，方便接入自定义上报。
 
 ## 在框架中使用
 

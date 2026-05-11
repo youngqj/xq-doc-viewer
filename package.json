@@ -15,7 +15,9 @@
     "./style.css": "./dist/style.css"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "README.en.md"
   ],
   "scripts": {
     "dev": "vite serve dev",
